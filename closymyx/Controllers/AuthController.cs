@@ -28,5 +28,19 @@ namespace closymyx.Controllers
                 return Ok("Регистрация успешна!");
             }
         }
+
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] LoginUserDto dto)
+        {
+            var authResult = await _userService.LoginAsync(dto);
+            if (authResult == null)
+            {
+                return Unauthorized("Неверный email или пароль");
+            }
+            else
+            {
+                return Ok(authResult);
+            }
+        }
     }
 }

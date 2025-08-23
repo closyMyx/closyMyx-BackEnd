@@ -2,12 +2,18 @@ using closymyx.DTOs;
 using closymyx.DAL.Entities;
 using closymyx.DAL.Repositories;
 using BCrypt.Net;
+using System.Text;
+using System.IdentityModel.Tokens.Jwt;
+using Microsoft.IdentityModel.Tokens;
+using System.Security.Claims;
+
 
 namespace closymyx.Services
 {
     public class UserService
     {
         private readonly UserRepository _userRepo;
+        private readonly string _jwtSecret = "ThisIsA32CharLongSecretKeyForJWT!";
 
         public UserService(UserRepository userRepo)
         {
@@ -29,6 +35,39 @@ namespace closymyx.Services
 
             await _userRepo.AddAsync(user);
             return true;
+        }
+
+        public async Task<AuthResponseDto?> LoginAsync(LoginUserDto dto)
+        {
+            var user = await _userRepo.GetByEmailAsync(dto.Email);
+            if (user == null) return null;
+
+            if (!BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash)) return null;
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.ASCII.GetBytes(_jwtSecret);
+
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(new Claim[]
+                {
+                    new Claim(ClaimTypes.NameIdentifier, user.ID.ToString()),
+                    new Claim(ClaimTypes.Email, user.Email)
+                }),
+                Expires = DateTime.UtcNow.AddHours(1),
+                SigningCredentials = new SigningCredentials(
+                    new SymmetricSecurityKey(key), 
+                    SecurityAlgorithms.HmacSha256Signature)
+            };
+
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            var jwt = tokenHandler.WriteToken(token);
+
+            return new AuthResponseDto
+            {
+                Email = user.Email,
+                Token = jwt
+            };
         }
     }
 }
