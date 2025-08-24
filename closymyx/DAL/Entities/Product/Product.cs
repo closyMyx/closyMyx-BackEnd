@@ -9,5 +9,7 @@ namespace closymyx.DAL.Entities
         public Category Category { get; set; } = null!;
 
         public List<ProductSubCategory> ProductSubCategories { get; set; } = new();
+
+        public ICollection<Favorite> Favorites { get; set; } = new List<Favorite>();
     }
 }

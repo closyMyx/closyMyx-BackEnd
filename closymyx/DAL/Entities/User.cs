@@ -8,8 +8,10 @@ namespace closymyx.DAL.Entities
 
         [Required, EmailAddress]
         public string Email { get; set; } = null!;
-        
+
         [Required]
         public string PasswordHash { get; set; } = null!;
+        
+        public ICollection<Favorite> Favorites { get; set; } = new List<Favorite>();
     }
 }
