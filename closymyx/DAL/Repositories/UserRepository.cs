@@ -15,13 +15,13 @@ namespace closymyx.DAL.Repositories
 
         public async Task<User?> GetByEmailAsync(string email)
         {
-            return await _db.User.FirstOrDefaultAsync(u => u.Email == email);
+            return await _db.Users.FirstOrDefaultAsync(u => u.Email == email);
         }
 
         public async Task AddAsync(User user)
         {
-            _db.User.Add(user);                 
-            await _db.SaveChangesAsync();       
+            _db.Users.Add(user);
+            await _db.SaveChangesAsync();
         }
     }
 }

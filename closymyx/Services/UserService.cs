@@ -1,19 +1,17 @@
-using closymyx.DTOs;
 using closymyx.DAL.Entities;
 using closymyx.DAL.Repositories;
-using BCrypt.Net;
+using closymyx.DTOs;
 using System.Text;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
-
 
 namespace closymyx.Services
 {
     public class UserService
     {
         private readonly UserRepository _userRepo;
-        private readonly string _jwtSecret = "ThisIsA32CharLongSecretKeyForJWT!";
+        private readonly string _jwtSecret = "jwtTokenForAppSuperSecretKey123!"; // минимум 128 бит для HMAC
 
         public UserService(UserRepository userRepo)
         {
@@ -51,12 +49,12 @@ namespace closymyx.Services
             {
                 Subject = new ClaimsIdentity(new Claim[]
                 {
-                    new Claim(ClaimTypes.NameIdentifier, user.ID.ToString()),
+                    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                     new Claim(ClaimTypes.Email, user.Email)
                 }),
                 Expires = DateTime.UtcNow.AddHours(1),
                 SigningCredentials = new SigningCredentials(
-                    new SymmetricSecurityKey(key), 
+                    new SymmetricSecurityKey(key),
                     SecurityAlgorithms.HmacSha256Signature)
             };
 

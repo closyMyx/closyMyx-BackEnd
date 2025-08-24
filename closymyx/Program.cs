@@ -11,11 +11,20 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddScoped<UserService>();
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+.AddJsonOptions(opt =>
+{
+    opt.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+});
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<UserRepository>();
 builder.Services.AddScoped<UserService>();
+
+builder.Services.AddScoped<ProductRepository>();
+builder.Services.AddScoped<CategoryRepository>();
+builder.Services.AddScoped<SubCategoryRepository>();
+builder.Services.AddScoped<ProductService>();
 
 builder.Services.AddCors(options =>
 {
