@@ -28,5 +28,22 @@ namespace closymyx.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+
+        [HttpGet("{productId}/similar")]
+        public async Task<IActionResult> GetSimilar(Guid productId)
+        {
+            try
+            {
+                var products = await _service.GetSimilarProductsAsync(productId);
+                if (products.Count == 0)
+                    return NotFound(new { message = "Похожие товары не найдены." });
+
+                return Ok(products);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
     }
 }

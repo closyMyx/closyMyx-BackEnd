@@ -10,8 +10,8 @@ namespace closymyx.Services
         private readonly CategoryRepository _categoryRepo; // нужен для проверки
         private readonly SubCategoryRepository _subCategoryRepo; // нужен для проверки
 
-        public ProductService(ProductRepository repo, 
-                              CategoryRepository categoryRepo, 
+        public ProductService(ProductRepository repo,
+                              CategoryRepository categoryRepo,
                               SubCategoryRepository subCategoryRepo)
         {
             _repo = repo;
@@ -55,5 +55,50 @@ namespace closymyx.Services
             };
         }
 
+        public async Task<List<ProductDto>> GetSimilarProductsAsync(Guid productId)
+        {
+            var product = await _repo.GetByIdAsync(productId);
+            if (product == null)
+                throw new Exception("Товар не найден");
+
+            var category = await _categoryRepo.GetByIdAsync(product.CategoryId);
+
+            // Разбиваем состав (Composition) на слова
+            var keywords = (product.Composition ?? "")
+                .Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Select(w => w.ToLower().Substring(0, Math.Min(5, w.Length))) // берём основу
+                .Distinct()
+                .ToList();
+
+            var allProducts = await _repo.GetByCategoryIdAsync(product.CategoryId);
+
+            var similar = allProducts
+                .Where(p => p.Id != product.Id && !string.IsNullOrWhiteSpace(p.Composition))
+                .Where(p => keywords.Any(k =>
+                    p.Composition!.ToLower()
+                        .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                        .Any(word => word.StartsWith(k))
+                ))
+                .Take(10)
+                .ToList();
+
+            // Загружаем подкатегории
+            var result = new List<ProductDto>();
+            foreach (var sim in similar)
+            {
+              var subs = await _subCategoryRepo.GetByProductIdAsync(sim.Id);
+
+                result.Add(new ProductDto
+                {
+                    Id = sim.Id,
+                    Name = sim.Name,
+                    Composition = sim.Composition,
+                    CategoryName = category?.Name ?? "",
+                    SubCategories = subs.Select(sc => sc.Name).ToList()
+                });
+            }
+
+            return result;
+        }
     }
 }

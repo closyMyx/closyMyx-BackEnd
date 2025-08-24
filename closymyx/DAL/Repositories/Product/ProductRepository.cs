@@ -21,11 +21,21 @@ namespace closymyx.DAL.Repositories
 
         public async Task<Product?> GetByIdAsync(Guid id)
         {
-           return await _db.Products
+            return await _db.Products
+                 .Include(p => p.Category)
+                 .Include(p => p.ProductSubCategories)
+                 .ThenInclude(psc => psc.SubCategory)
+                 .FirstOrDefaultAsync(p => p.Id == id);
+        }
+        
+        public async Task<List<Product>> GetByCategoryIdAsync(Guid categoryId)
+        {
+            return await _db.Products
+                .Where(p => p.CategoryId == categoryId)
                 .Include(p => p.Category)
                 .Include(p => p.ProductSubCategories)
-                .ThenInclude(psc => psc.SubCategory)
-                .FirstOrDefaultAsync(p => p.Id == id);
+                    .ThenInclude(psc => psc.SubCategory)
+                .ToListAsync();
         }
     }
 }
