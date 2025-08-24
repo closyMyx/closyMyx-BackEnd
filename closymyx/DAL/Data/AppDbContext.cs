@@ -11,6 +11,7 @@ namespace closymyx.DAL.Data
         public DbSet<Product> Products { get; set; } = null!;
         public DbSet<ProductSubCategory> ProductSubCategories { get; set; } = null!;
         public DbSet<Favorite> Favorites { get; set; } = null!;
+        public DbSet<Top> Top { get; set; } = null!;
         public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options) { }
 
@@ -25,6 +26,7 @@ namespace closymyx.DAL.Data
             modelBuilder.Entity<Product>().ToTable("Products");
             modelBuilder.Entity<ProductSubCategory>().ToTable("ProductSubCategories");
             modelBuilder.Entity<Favorite>().ToTable("Favorites");
+            modelBuilder.Entity<Top>().ToTable("Top");
 
             // Настройка ключей для связующей таблицы
             modelBuilder.Entity<ProductSubCategory>()
@@ -62,6 +64,18 @@ namespace closymyx.DAL.Data
             modelBuilder.Entity<Favorite>()
                 .HasOne(f => f.Product)
                 .WithMany(p => p.Favorites);
+
+            modelBuilder.Entity<Top>()
+                .HasKey(f => new { f.UserId, f.ProductId });
+
+            modelBuilder.Entity<Top>()
+                .HasOne(f => f.User)
+                .WithMany(u => u.Top)
+                .HasForeignKey(f => f.UserId);
+
+            modelBuilder.Entity<Top>()
+                .HasOne(f => f.Product)
+                .WithMany(p => p.Top);
         }
     }
 }

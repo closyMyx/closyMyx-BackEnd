@@ -11,5 +11,6 @@ namespace closymyx.DAL.Entities
         public List<ProductSubCategory> ProductSubCategories { get; set; } = new();
 
         public ICollection<Favorite> Favorites { get; set; } = new List<Favorite>();
+         public ICollection<Top> Top { get; set; } = new List<Top>();
     }
 }

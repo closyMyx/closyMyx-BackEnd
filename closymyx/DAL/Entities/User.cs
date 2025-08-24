@@ -11,7 +11,8 @@ namespace closymyx.DAL.Entities
 
         [Required]
         public string PasswordHash { get; set; } = null!;
-        
+
         public ICollection<Favorite> Favorites { get; set; } = new List<Favorite>();
+         public ICollection<Top> Top { get; set; } = new List<Top>();
     }
 }
